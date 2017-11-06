@@ -1,4 +1,6 @@
 import scala.collection.immutable
+import scala.io.Source
+
 //test
 // #1
 // your code goes here
@@ -17,49 +19,89 @@ def total_encode(mes:List[Char], alph:List[Char], num:Int):immutable.IndexedSeq[
     vars <- encode(mes, alph, n)
   } yield vars}
 //total_encode(message, alph2, num)
+val answer1 = encode(message, alph2, 7)
 
-println(s"#1 - ${encode(message, alph2, 7)}")
+println(s"#1 - ${answer1}")
 
 // #2
 
 // your code goes here
+val rawvalues=Source.fromURL("https://drive.google.com/uc?export=download&id=0Bw8apsd2PoTYRERMNWVGc044VW8").mkString
+val values=rawvalues split "\\s+"
+val x = values(0)
+val y = values(1)
 
-def convert_it(list:List[Char], n:Int):Double = list match{
-  case Nil => 0
-  case  x::xs=>(x.toInt-48)*scala.math.pow(2,n)+convert_it(xs, n+1)}
-//def convert_it2(n:Double):List[Char] = {if (n==0) List()
-//else (n%2).toChar::convert_it2(n/2)}
+def BinarySum (a:String, b:String):List[Int] = {
+val x1 =a.toList.reverse.map(_.toInt-48)
+val y1 =b.toList.reverse.map(_.toInt-48)
+  def sum(a1:List[Int], b1: List[Int], n:Int):List[Int]=
+  (a1,b1) match {
+    case (Nil, Nil) => List()
 
-val x ="10001011101010101010000111110111011110101010101101110101010101010010000010110100101010101011011010100101011010101010101010101010101110101011000101101011110101010101010101010001010101010101101010101010101010101010101010111000001010101111010100111010101001011101010111111111101010101111111101010111110101001010101111110111101011010111111101011110101111111111111101111111111010101111101010101001111101010101010100100101010111101001010101001010101001010111110101010101010101011110101010010101001111101010100101111101010101001111111111101010111111111101001010111111110110101001111101010101111111010110100011111111111010101101011111110101010101110101010101010001110111101010101010101010101000001010110111111010101010010101011110101010000001010101000000000000101001111100000000000010010101010000001".toList.reverse
-val y ="11100101000010101000001010010000010101011000110000110101000001010100000010000000010101100000110100100010111111111111111010010001010000001000000100000101011110101000000001010100000001010100101010111001010100000000000010101010101101010010101010101111001010000000000000001010010100111000010000000010100001010101000000110000001010101000000000000101001111100000000000010010101010000001".toList.reverse
+    case (Nil, y::ys) => if (n==0) y::sum(ys, Nil, 0)
+    else if ((x+n)==2) 0::sum(ys, Nil, 1)
+    else n::sum(ys, Nil, 0)
 
-//def sumofbinaries(x:List[Char], y: List[Char], n:Int):List[Char]=(x, y) match {
-//  case (el1::xs1, Nil) => if (n==0) el1::xs1
-//        else if
-//  case (el1::xs1, el2::ys1) => if (el1==el2==0) n.toChar::sumofbinaries(xs1, ys1, 0)}
+    case (x::xs, Nil) => if (n==0) x::sum(xs, Nil, 0)
+    else if ((x+n)==2) 0::sum(xs, Nil, 1)
+    else n::sum(xs, Nil, 0)
 
-val x1 = convert_it(x, 0)
-val y1 = convert_it(y, 0)
+    case (x::xs, y::ys) => if ((x+y+n)==1) 1::sum(xs,ys,0)
+    else if ((x+y+n)==2) 0::sum(xs,ys,1)
+    else if ((x+y+n)==3) 1::sum(xs,ys,1)
+    else  0::sum(xs,ys,0)
+  }
+  sum(x1, y1, 0).reverse
+}
+val answer2 = BinarySum(x,y).count(_==1)-BinarySum(x,y).count(_==0)
 
-val answer=(x1+y1)
-
-
-println(s"#2 - ${/*answer #2*/}")
+println(s"#2 - ${answer2}")
 
 // #3
 
 // your code goes here
+def sum(n:Int):Int ={
+  def sum_extended(x:Int, i:Int, sum:Int):Int={
+    val list=(x).toBinaryString.toList
+    if (i==n) sum
+    else if (list==list.reverse) sum_extended(x+1, i+1, sum+x)
+    else sum_extended(x+1, i, sum)}
+  sum_extended(1, 0, 0)
+}
 
-println(s"#3 - ${/*answer #3*/}")
+println(s"#3 - ${sum(73)}")
 
 // #4
 
 // your code goes here
+val list =List(-1, -1, -2, -2, 1, -5, 1, 0, 1, 14, -8, 4, 5, -11, 13, 5, 7, -10, -4, 3, -6, 8, 6, 2, -9, -1, -4, 0)
 
-println(s"#4 - ${/*answer #4*/}")
+def flatMapSublists[A,B](ls: List[A])(f: (List[A]) => List[B]): List[B] =
+  ls match {
+    case Nil => Nil
+    case sublist@(_ :: tail) => f(sublist) ::: flatMapSublists(tail)(f)
+  }
+
+def combinations[A](n: Int, ls: List[A]): List[List[A]] =
+  if (n == 0) List(Nil)
+  else flatMapSublists(ls) { sl =>
+    combinations(n - 1, sl.tail) map {sl.head :: _}
+  }
+
+val combo = combinations(3, list) filter (x=>(x.sum==0))  map (x=>x.sorted)
+val prefinal = combo.distinct
+
+println(s"#4 - ${prefinal.length}")
 
 // #5
+val rawfile = Source.fromURL("https://drive.google.com/uc?export=download&id=0Bw8apsd2PoTYb05lVk0tbzFlZzg")
+val data = rawfile.mkString split "\\s+" map(_ toDouble)
+val nums = data.toList
+
+def Sum(xs: List[Double]) = (xs foldLeft 0.0)(_+_)
+
+val answer5=Sum(nums).toString.filter(_.isDigit).take(10)
 
 // your code goes here
 
-println(s"#5 - ${/*answer #5*/}")
+println(s"#5 - ${answer5}")
